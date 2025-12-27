@@ -1,0 +1,19 @@
+services:
+  - type: worker
+    name: sunflower-bot
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.0
+      - key: BOT_TOKEN
+        sync: false
+      - key: SUNO_API_KEY
+        sync: false
+      - key: SUNO_API_URL
+        sync: false
+      - key: LOG_LEVEL
+        value: INFO
