@@ -38,10 +38,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_message = f"""
 🤖 Hello {user_name}! Welcome to my learning bot!
 
-I'm a simple bot created during Workshop 2. Here's what I can do:
-
 🎯 Commands:
-/start - Show this welcome message
+/gen - generate music by prompt
 /help - Show help information
 /about - Learn about this bot
 
@@ -163,7 +161,6 @@ def main():
 
     application = Application.builder().token(BOT_TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
     application.add_handler(CommandHandler("gen", gen_handler))
