@@ -56,9 +56,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = """
 🆘 Help Information
 
-This is a learning bot created in Workshop 2. Here are the available commands:
-
-/start - Welcome message and bot introduction
+/gen - Generate music by prompt
 /help - Show this help message
 /about - Information about this bot
 
@@ -149,19 +147,11 @@ async def gen_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(poll_interval)
 
     
-async def shutdown(application: Application):
-    logger.info("🛑 Shutting down bot gracefully...")
-    await application.stop()
-    await application.shutdown()
-    logger.info("✅ Bot shutdown complete")
-
-
 def main():
     logger.info("🤖 Starting bot on Render...")
 
     application = Application.builder().token(BOT_TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
     application.add_handler(CommandHandler("gen", gen_handler))
