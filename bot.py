@@ -157,39 +157,22 @@ async def shutdown(application: Application):
 
 
 def main():
-    logger.info("🤖 Starting the bot...")
+    logger.info("🤖 Starting bot on Render...")
 
     application = Application.builder().token(BOT_TOKEN).build()
 
+    application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("about", about_command))
     application.add_handler(CommandHandler("gen", gen_handler))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo_message))
     application.add_error_handler(error_handler)
 
-    loop = asyncio.get_event_loop()
-
-    async def run():
-        await application.initialize()
-        await application.start()
-        await application.bot.initialize()
-        await application.updater.start_polling()
-        logger.info("✅ Bot is running")
-
-        # Wait forever until signal
-        await asyncio.Event().wait()
-
-    for sig in (signal.SIGTERM, signal.SIGINT):
-        loop.add_signal_handler(
-            sig,
-            lambda s=sig: asyncio.create_task(shutdown(application))
-        )
-
-    try:
-        loop.run_until_complete(run())
-    finally:
-        loop.close()
-
+    # IMPORTANT for Render:
+    application.run_polling(
+        stop_signals=[signal.SIGINT, signal.SIGTERM],
+        close_loop=False,
+    )
 
 if __name__ == '__main__':
     main()
