@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Suno API Integration Module"""
 
+import asyncio
 import logging
 import os
-import time
 
-import requests
+import aiohttp
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,7 +28,7 @@ _headers = {
 REQUEST_TIMEOUT = 30
 
 
-def create_generating_tasks(prompt, count):
+async def create_generating_tasks(prompt, count):
     data = {
         "customMode": False,
         "instrumental": False,
@@ -38,51 +38,49 @@ def create_generating_tasks(prompt, count):
         "negativeTags": "",
     }
     tasks_ids = []
-    for _ in range(count):
-        response = requests.post(
-            f"{SUNO_API_URL}/generate",
-            headers=_headers,
-            json=data,
-            timeout=REQUEST_TIMEOUT,
-        )
 
-        if response.status_code == 200:
-            result = response.json()
-            task_id = result["data"]["taskId"]
-            logger.info(f"✅ Started: {task_id}")
-            tasks_ids.append(task_id)
-        else:
-            logger.error(f"❌ Failed: {response.status_code}")
-            raise Exception(f"API returned {response.status_code}")
+    timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        for _ in range(count):
+            async with session.post(
+                f"{SUNO_API_URL}/generate",
+                headers=_headers,
+                json=data,
+            ) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    task_id = result["data"]["taskId"]
+                    logger.info(f"✅ Started: {task_id}")
+                    tasks_ids.append(task_id)
+                else:
+                    logger.error(f"❌ Failed: {response.status}")
+                    raise Exception(f"API returned {response.status}")
 
-        time.sleep(1)  # even 0.5 helps
+            await asyncio.sleep(1)  # even 0.5 helps
 
     return tasks_ids
 
 
-def get_generated_tracks(task_id):
+async def get_generated_tracks(task_id):
     logger.info(f"📊 Checking: {task_id}")
 
-    response = requests.get(
-        f"{SUNO_API_URL}/generate/record-info?taskId={task_id}",
-        headers=_headers,
-        timeout=REQUEST_TIMEOUT,
-    )
-
-    if response.status_code == 200:
-        result = response.json()
-        data = result["data"]
-        if data["status"] == "SUCCESS":
-            urls = []
-            for record in data["response"]["sunoData"]:
-                audioUrl = record["audioUrl"]
-                title = record["title"]
-                urls.append((audioUrl, title))
-
-            return urls
-
-        else:
-            return None
-
-    else:
-        raise Exception(f"Status check returned {response.status_code}")
+    timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(
+            f"{SUNO_API_URL}/generate/record-info?taskId={task_id}",
+            headers=_headers,
+        ) as response:
+            if response.status == 200:
+                result = await response.json()
+                data = result["data"]
+                if data["status"] == "SUCCESS":
+                    urls = []
+                    for record in data["response"]["sunoData"]:
+                        audioUrl = record["audioUrl"]
+                        title = record["title"]
+                        urls.append((audioUrl, title))
+                    return urls
+                else:
+                    return None
+            else:
+                raise Exception(f"Status check returned {response.status}")
