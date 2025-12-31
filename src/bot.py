@@ -124,7 +124,7 @@ async def gen_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 GENERATION_TIMEOUT = 300
 SLEEP_INTERVAL = 30
-TASKS_COUNT = 3
+TASKS_COUNT = 4
 
 
 async def _gen_tracks(message: Message, prompt):
