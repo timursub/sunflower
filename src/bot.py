@@ -52,7 +52,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Hello {user_name}! Welcome to Sunflower Music Generator Bot!
 
 This bot lets you generate music tracks using Suno AI.
-Describe the music you want, and the bot will generate 6 unique tracks and send them to you as MP3 files.
+Describe the music you want, and the bot will generate 8 unique tracks and send them to you as MP3 files.
 {commands_description}
     """
 
@@ -105,7 +105,7 @@ async def gen_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.application.create_task(_gen_and_send(update.message, prompt))
 
 
-GENERATION_TIMEOUT = 300
+GENERATION_TIMEOUT = 400
 SLEEP_INTERVAL = 30
 TASKS_COUNT = 4
 
